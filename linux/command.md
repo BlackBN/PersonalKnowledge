@@ -1,4 +1,5 @@
 ```bash
+
 $ echo $$ #打印当前进程PID, $$ 代表当前脚本的PID
 $ ls -l /proc/$$/ns #查看当前进程的各个namespace
 
