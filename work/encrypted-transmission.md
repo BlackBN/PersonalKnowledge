@@ -3,7 +3,7 @@
 创建自签名证书
 
 1、生成私钥
-$ openssl genrsa -out ca.key 2048
+$ openssl genrsa -out ca.key 4096
 
 2、生成公钥
 $ openssl req -new -key ca.key -out ca.csr
@@ -44,7 +44,7 @@ SAN(Subject Alternative Name) 是 SSL 标准 x509 中定义的一个扩展。使
 $ vim server.conf
 
 [ req ]
-default_bits       = 2048
+default_bits       = 4096
 distinguished_name = req_distinguished_name
 req_extensions     = req_ext
 
