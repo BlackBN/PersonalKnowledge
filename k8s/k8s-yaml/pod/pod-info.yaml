@@ -1,0 +1,146 @@
+apiVersion: v1 #版本号
+kind: Pod #类型
+metadata:
+  name: liveness-exec
+  labels:
+    name: liveness-exec
+    
+spec:
+  restartPolicy: Always # Always：总是重启； OnFailure：如果失败就重启； Never：永远不重启
+  schedulerName: my_scheduler
+
+  nodeSelector:
+    app: test
+  affinity:
+    nodeAffinity: 
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/e2e-az-name
+            operator: In
+            values:
+            - e2e-az1
+            - e2e-az2
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: another-node-label-key
+              operator: In
+              values:
+              - another-node-label-value
+  
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - web-store
+        topologyKey: "kubernetes.io/hostname"
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - store
+        topologyKey: "kubernetes.io/hostname"  
+  tolerations:
+    - key: "test1"
+      operator: "Equal"
+      value: "value"
+      effect: "NoSchedule"
+    - key: "test2"
+      operator: "Exists"
+      effect: "NoSchedule"
+      
+    - key: "test3"
+      operator: "Equal"
+      value: "value"
+      effect: "PreferNoSchedule"
+    - key: "test4"
+      operator: "Exists"
+      effect: "PreferNoSchedule"
+
+    - key: "test5"
+      operator: "Equal"
+      value: "value"
+      effect: "NoExecute"
+    - key: "test6"
+      operator: "Exists"
+      effect: "NoExecute"
+      
+    - operator: "Exists" #容忍所有污点 key
+    - key: "key" #表示容忍所有的污点作用
+      operator: "Exists"
+
+  priorityClassName: high-priority #Pod priority preemtion pod优先级抢占
+  initContainers:
+  - name: abc
+
+  containers:
+  - name: liveness-exec
+    image: busybox:latest
+    imagePullPolicy: Always
+    command: ["/bin/sh", "-c",]
+    args:
+      - /bin/sh
+      - -c
+      - touch /tmp/healthy; sleep 20; rm -rf /tmp/healthy; sleep 600;
+    livenessProbe:
+      exec: 
+        command:
+          - cat
+          - /tmp/healthy
+      httpGet:
+        path: /tmp/healthy # http 服务器上的访问 URI
+        host: 127.0.0.1 #要连接的主机名，默认为 Pod IP，可以在 http request head 中设置 host 头部。
+        port: 8080 #容器上要访问端口号或名称
+        httpHeaders: #自定义 HTTP 请求 headers，HTTP 允许重复 headers
+          - name: X-Custom-Header
+            value: Awesome
+        scheme: HTTP #用于连接 host 的协议，默认为 HTTP
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      timeoutSeconds: 1 
+      successThreshold: 1
+      failureThreshold: 3
+    readinessProbe:
+      exec: 
+        command:
+          - cat
+          - /tmp/healthy
+      httpGet:
+        path: /tmp/healthy # http 服务器上的访问 URI
+        host: 127.0.0.1 #要连接的主机名，默认为 Pod IP，可以在 http request head 中设置 host 头部。默认为 localhost
+        port: 8080 #容器上要访问端口号或名称
+        httpHeaders: #自定义 HTTP 请求 headers，HTTP 允许重复 headers
+          - name: X-Custom-Header
+            value: Awesome
+        scheme: HTTP #用于连接 host 的协议，默认为 HTTP
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80
+####
+# 1.livenessProbe 存活性探针
+# 用于判断容器是否存活，即 Running 状态。如果 livenessProbe 探针检测到容器不健康，则 kubelet 会杀死容器，并根据容器的重启策略进行容器的重启。
+# 如果容器没有定义 livenessProbe 探针，则 livenessProbe 返回状态永远为 Success。
+
+# 2.readinessProbe 就绪性探针
+# 用于判断容器服务（service）是否可用，即 Ready 状态。如果 Ready 状态，则表示Service 与 Pod EndPoint 建立了关联，并且将其保存到 EndPoint 列表中，以供服务调用；
+# 如果状态变为 Failure , Kubernetes 会将其从 EndPoint 列表中移除，保证通过 Service 访问时不会将流量路由到不健康的 Pod 上，
+# 等到状态恢复到 Ready 状态再将其对应的 EndPoint 加入EndPoint 列表中。
+# 如果容器没有定义 readinessProbe 探针，则 readiness 返回状态永远为 Success。
+#####

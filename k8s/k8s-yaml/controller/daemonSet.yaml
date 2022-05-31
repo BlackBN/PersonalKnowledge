@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-cloud-logging
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-cloud-logging
+spec: 
+  selector:
+    matchLabels:
+      app: fluentd-cloud-loggin
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata: 
+      name: fluentd-cloud-logging
+      labels: 
+        k8s-app: fluentd-cloud-logging
+    spec:
+      containers:
+      - name: fluentd-cloud-logging
+        image: es:233
+        resources:
+          limits: 
+            cpu: 100m
+            memory: 100m
+        env:
+        - name: FLUENTD_ARGS
+          value: -q
+        volumeMounts:
+        - name: varlogs
+          mountPath: /var/log
+          readOnly: false
+        - name: containers
+          mountPath: /var/lib/docker/containers
+          readOnly: false
+      volumes:
+      - name: varlogs
+        hostPath:
+          path: /var/log
+      - name: continers
+        hostPath:
+          path: /var/lib/docker/containers

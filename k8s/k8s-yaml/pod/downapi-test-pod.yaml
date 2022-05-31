@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: downapi-test-pod-002
+  labels:
+    name: downapi-test-pod-002
+spec:
+  containers:
+  - name: downapi-test-pod-002
+    image: busybox
+    command: ["/bin/sh", "-c","env"]
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    env:
+      - name: MY_POD_NAME
+        valueFrom:
+            fieldRef: 
+              fieldPath: metadata.name
+      - name: MY_POD_NAMESPACE
+        valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+      - name: MY_POD_IP
+        valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+  restartPolicy: Never

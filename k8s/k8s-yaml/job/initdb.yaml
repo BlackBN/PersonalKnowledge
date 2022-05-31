@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xujiayu-test
+  namespace: vke-system
+spec:
+  template:
+    spec:
+      containers:
+      - command:
+        - /app/db-initializer
+        - --dsn
+        - host=postgresql-ha-pgpool port=5432 dbname=monitoring user=vecps-monitoring
+          password=eps@2021VeCompass sslmode=require TimeZone=Asia/Shanghai
+        image: guoxin-dev.cargo.io/release/db-oem-initializer:v1.0.0-test1
+        imagePullPolicy: Always
+        name: insight-builtin-data-init-oem
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      restartPolicy: Never
+  backoffLimit: 4

@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: cm-appvars
+data: 
+  apploglevel: info
+  appdatadir: /Users/caicloud/Documents/kubectlYaml/mysql/data

@@ -1,0 +1,344 @@
+apiVersion: v1
+data:
+  relay: |
+    exporters:
+      prometheusremotewrite:
+        endpoint: http://${VM_HOST}:8480/insert/0/prometheus
+        external_labels:
+          cluster: ${CLUSTER_NAME}
+    extensions:
+      health_check: {}
+    processors:
+      batch: {}
+      memory_limiter:
+        ballast_size_mib: 819
+        check_interval: 5s
+        limit_mib: 1638
+        spike_limit_mib: 512
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+          - job_name: opentelemetry-collector
+            scrape_interval: 10s
+            static_configs:
+            - targets:
+              - localhost:8888
+          - job_name: coredns
+            kubernetes_sd_configs:
+            - namespaces:
+                names:
+                - kube-system
+              role: endpoints
+            relabel_configs:
+            - action: keep
+              regex: coredns;metrics
+              source_labels:
+              - __meta_kubernetes_service_name
+              - __meta_kubernetes_endpoint_port_name
+            - source_labels:
+              - __meta_kubernetes_pod_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_pod_host_ip
+              target_label: host_ip
+          - job_name: kube-state-metrics
+            kubernetes_sd_configs:
+            - namespaces:
+                names:
+                - kube-system
+              role: service
+            metric_relabel_configs:
+            - regex: ReplicaSet;([\w|\-]+)\-[0-9|a-z]+
+              replacement: $$1
+              source_labels:
+              - created_by_kind
+              - created_by_name
+              target_label: created_by_name
+            - regex: ReplicaSet
+              replacement: Deployment
+              source_labels:
+              - created_by_kind
+              target_label: created_by_kind
+            relabel_configs:
+            - action: keep
+              regex: kube-state-metrics
+              source_labels:
+              - __meta_kubernetes_service_name
+          - job_name: node-exporter
+            kubernetes_sd_configs:
+            - namespaces:
+                names:
+                - kube-system
+              role: endpoints
+            relabel_configs:
+            - action: keep
+              regex: node-exporter
+              source_labels:
+              - __meta_kubernetes_service_name
+            - source_labels:
+              - __meta_kubernetes_pod_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_pod_host_ip
+              target_label: host_ip
+          - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: kube-apiserver
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: keep
+              regex: true
+              source_labels:
+              - __meta_kubernetes_node_labelpresent_node_role_kubernetes_io_master
+            - regex: ([^:]+)(?::\d+)?
+              replacement: $$1:6443
+              source_labels:
+              - __address__
+              target_label: __address__
+            - source_labels:
+              - __meta_kubernetes_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_node_address_internalIP
+              target_label: host_ip
+            - source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              target_label: node_alias
+            - action: replace
+              regex: ;(.*)
+              replacement: $$1
+              source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              - __meta_kubernetes_node_name
+              target_label: node_alias
+            scheme: https
+            tls_config:
+              insecure_skip_verify: true
+          - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: kube-scheduler
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: keep
+              regex: true
+              source_labels:
+              - __meta_kubernetes_node_labelpresent_node_role_kubernetes_io_master
+            - regex: ([^:]+)(?::\d+)?
+              replacement: $$1:10259
+              source_labels:
+              - __address__
+              target_label: __address__
+            - source_labels:
+              - __meta_kubernetes_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_node_address_internalIP
+              target_label: host_ip
+            - source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              target_label: node_alias
+            - action: replace
+              regex: ;(.*)
+              replacement: $$1
+              source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              - __meta_kubernetes_node_name
+              target_label: node_alias
+            scheme: https
+            tls_config:
+              insecure_skip_verify: true
+          - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: kubelet
+            kubernetes_sd_configs:
+            - role: node
+            metric_relabel_configs:
+            - action: keep
+              regex: kubelet_.+
+              source_labels:
+              - __name__
+            relabel_configs:
+            - source_labels:
+              - __meta_kubernetes_node_address_internalIP
+              target_label: host_ip
+            - source_labels:
+              - __meta_kubernetes_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              target_label: node_alias
+            - action: replace
+              regex: ;(.*)
+              replacement: $$1
+              source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              - __meta_kubernetes_node_name
+              target_label: node_alias
+            scheme: https
+            tls_config:
+              insecure_skip_verify: true
+          - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            job_name: cadvisor
+            kubernetes_sd_configs:
+            - role: node
+            metrics_path: /metrics/cadvisor
+            relabel_configs:
+            - source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              target_label: node_alias
+            - action: replace
+              regex: ;(.*)
+              replacement: $$1
+              source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              - __meta_kubernetes_node_name
+              target_label: node_alias
+            scheme: https
+            tls_config:
+              insecure_skip_verify: true
+          - job_name: etcd-cluster
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: keep
+              regex: true
+              source_labels:
+              - __meta_kubernetes_node_labelpresent_node_role_kubernetes_io_master
+            - regex: ([^:]+)(?::\d+)?
+              replacement: $$1:2379
+              source_labels:
+              - __address__
+              target_label: __address__
+            - source_labels:
+              - __meta_kubernetes_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_node_address_internalIP
+              target_label: host_ip
+            - source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              target_label: node_alias
+            - action: replace
+              regex: ;(.*)
+              replacement: $$1
+              source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              - __meta_kubernetes_node_name
+              target_label: node_alias
+            scheme: https
+            tls_config:
+              ca_file: /etc/otel-collector/secrets/etcd-cert/etcd-ca
+              cert_file: /etc/otel-collector/secrets/etcd-cert/etcd-cert
+              insecure_skip_verify: true
+              key_file: /etc/otel-collector/secrets/etcd-cert/etcd-key
+          - job_name: etcd-events
+            kubernetes_sd_configs:
+            - role: node
+            relabel_configs:
+            - action: keep
+              regex: true
+              source_labels:
+              - __meta_kubernetes_node_labelpresent_node_role_kubernetes_io_master
+            - regex: ([^:]+)(?::\d+)?
+              replacement: $$1:2381
+              source_labels:
+              - __address__
+              target_label: __address__
+            - source_labels:
+              - __meta_kubernetes_node_name
+              target_label: node
+            - source_labels:
+              - __meta_kubernetes_node_address_internalIP
+              target_label: host_ip
+            - source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              target_label: node_alias
+            - action: replace
+              regex: ;(.*)
+              replacement: $$1
+              source_labels:
+              - __meta_kubernetes_node_annotation_vke_volcengine_com_alias
+              - __meta_kubernetes_node_name
+              target_label: node_alias
+            scheme: https
+            tls_config:
+              ca_file: /etc/otel-collector/secrets/etcd-cert/etcd-ca
+              cert_file: /etc/otel-collector/secrets/etcd-cert/etcd-cert
+              insecure_skip_verify: true
+              key_file: /etc/otel-collector/secrets/etcd-cert/etcd-key
+          - job_name: ingress-nginx
+            kubernetes_sd_configs:
+            - role: pod
+            relabel_configs:
+            - action: keep
+              regex: ingress-nginx
+              source_labels:
+              - __meta_kubernetes_pod_label_app_kubernetes_io_name
+          - job_name: kubernetes-pods
+            kubernetes_sd_configs:
+            - role: pod
+            relabel_configs:
+            - action: keep
+              regex: true
+              source_labels:
+              - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_namespace
+              target_label: kubernetes_namespace
+            - action: replace
+              source_labels:
+              - __meta_kubernetes_pod_name
+              target_label: kubernetes_pod_name
+    service:
+      extensions:
+      - health_check
+      pipelines:
+        metrics:
+          exporters:
+          - prometheusremotewrite
+          processors:
+          - memory_limiter
+          - batch
+          receivers:
+          - prometheus
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: metrics-collector
+    meta.helm.sh/release-namespace: kube-system
+  creationTimestamp: "2022-01-14T07:56:13Z"
+  labels:
+    app.kubernetes.io/instance: metrics-collector
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: metrics-collector
+    app.kubernetes.io/version: v1.2.0
+    helm.sh/chart: metrics-collector-v1.2.0
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:data:
+        .: {}
+        f:relay: {}
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:meta.helm.sh/release-name: {}
+          f:meta.helm.sh/release-namespace: {}
+        f:labels:
+          .: {}
+          f:app.kubernetes.io/instance: {}
+          f:app.kubernetes.io/managed-by: {}
+          f:app.kubernetes.io/name: {}
+          f:app.kubernetes.io/version: {}
+          f:helm.sh/chart: {}
+    manager: helm
+    operation: Update
+    time: "2022-01-14T07:56:13Z"
+  name: metrics-collector
+  namespace: kube-system
+  resourceVersion: "26004"
+  uid: 3204333c-c517-4465-9103-bbb777d8280c

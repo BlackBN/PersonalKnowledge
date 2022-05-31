@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-test-app
+  labels:
+    name: cm-test-app
+spec:
+  containers:
+  - name: cm-test-app
+    image: kubeguide/tomcat-app:v1
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8080
+    volumeMounts:
+      - mountPath: /configfiles 
+        name: serverxml
+  volumes:
+    - name: serverxml
+      configMap:
+          name: envfile
+          items:
+          - key: test.xml
+            path: server.xml
+          - key: application.properties
+            path: logging.properties

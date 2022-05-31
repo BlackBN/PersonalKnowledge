@@ -1,0 +1,47 @@
+apiVersion: apps/v1  #kubectl api-versions 可以通过这条指令去看版本信息
+kind: Deployment # 指定资源类别
+metadata: #资源的一些元数据
+  name: provider-service #deloyment的名称
+  namespace: xujiayu
+  labels:
+    app: provider-service  #标签
+spec:
+  replicas: 1 #创建pod的个数
+  selector:
+    matchLabels:
+      app: provider-service #满足标签为这个的时候相关的pod才能被调度到
+  template:
+    metadata:
+      # labels:
+      #   app: provider-service
+      #   apphub.volcengine.com/ploto-domain: default
+      #   apphub.volcengine.com/ploto-system: default
+      #   apphub.volcengine.com/instance-region: beijing1
+      #   apphub.volcengine.com/instance-zone: psm
+      #   apphub.volcengine.com/instance-cluster: business
+      #   apphub.volcengine.com/service-name: provider-service
+      # annotations:
+      #   apphub.volcengine.com/consul-server-addresses: 172.19.35.91:31500
+      #   apphub.volcengine.com/instance-additional-tags: version=v1,prd=false
+      #   mesh.volcengine.com/sidecar-injected: enabled
+      #   mesh.volcengine.com/hostport-exposed: enabled
+      #   mesh.volcengine.com/javaagent-feature: enabled
+    spec:
+      containers:
+        - name: provider-service
+          image: vecps.cargo.io/infcprelease/test-springboot:provider-service1 
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 6700
+          volumeMounts:
+            - mountPath: /javaagent-jar
+              name: springboot-deploy-local-pvc
+      volumes:
+        - name: springboot-deploy-local-pvc
+          persistentVolumeClaim:
+            claimName: springboot-deploy-local-pvc
