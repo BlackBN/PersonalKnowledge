@@ -1,3 +1,5 @@
+# kafka命令
+
 ```bash
 docker exec -it kafka /bin/bash
 
@@ -16,5 +18,3 @@ find / -name \*kafka_\* | head -1 | grep -o '\kafka[^\n]*' #查看版本号
 kafka-topics.sh --zookeeper host:2181 --list
 
 ```
-
-

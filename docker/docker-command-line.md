@@ -1,7 +1,6 @@
+# docker 命令
 
 ```bash
-docker命令：
-
 docker ps -s #查看哪些容器正在运行
 docker exec -it a93f15468550 bash #进入容器
 docker build -t ceres-java . 
@@ -46,8 +45,6 @@ docker run -d --restart=always --link node-exporter --name prometheus -p 9090:90
 docker run -d --restart=always --link prometheus --link mysql --name=grafana -p 3000:3000 -v /Users/bn/Documents/Technology/docker/grafana/grafana-storage:/var/lib/grafana grafana/grafana
 ```
 
-
-
 ```bash
 #原文：https://www.jianshu.com/p/4807cfb5861a
 
@@ -68,8 +65,6 @@ docker run -d -it --restart=always --name filebeat --link kafka -v /Users/bn/Doc
 docker run -d -it --restart=always -p 5044:5044 --name logstash --link elasticsearch --link kafka -v /Users/bn/Documents/Technology/docker/elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf docker.elastic.co/logstash/logstash:7.5.2
 
 ```
-
-
 
 ```bash
 启动apisix
@@ -100,11 +95,11 @@ docker-compose -p docker-apisix start
 docker-compose -p docker-apisix stop
 
 ```
+
 ```bash
 创建 mysql :
 docker run -it --name=mysql-test --restart=always -e MYSQL_DATABASE=test -e MYSQL_USER=test -e MYSQL_PASSWORD=test -e MYSQL_ROOT_PASSWORD=root -v /Users/bn/Documents/Technology/docker/mysql-test:/var/lib/mysql -p 3307:3306 -d mysql:5.7
 ```
-
 
 ```bash
 创建 nacos :
