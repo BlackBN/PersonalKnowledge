@@ -59,6 +59,7 @@ Swap:             0           0           0
 4.同步时间
 
 ```bash
+#下载时钟同步器
 $ yum install ntpdate
 $ ntpdate cn.pool.ntp.org
 ```
