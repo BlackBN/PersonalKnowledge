@@ -37,6 +37,10 @@ SELINUXTYPE=targeted
 
 ```bash
 
+#临时关闭
+$ swapoff -a
+
+#永久关闭
 $ vim /etc/fstab
 #
 # /etc/fstab
@@ -175,8 +179,8 @@ $ kubectl get node
 11.加入node节点
 
 ```bash
-$ kubeadm join 192.168.56.100:6443 --v=5 --token h58elm.lui40qxy4t1cagin \
-    --discovery-token-ca-cert-hash sha256:275c54cb752462b86a6a60ea199faf1f384c16acef0d996b4f4dda648de7e979
+$ kubeadm join 192.168.56.100:6443 --v=5 --token u9rswh.4201x61jdm8owxme \
+    --discovery-token-ca-cert-hash sha256:480bf0f547f4aa6dddf1972d0c8e14bfdb108e572fd3f6230914977bd64e407b
 #如果有报错，可以查看日志，解决完以后再次执行该命令
 $ kubeadm reset
 $ rm -rf /etc/kubernetes

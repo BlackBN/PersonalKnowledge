@@ -40,11 +40,8 @@ iptables -A INPUT 2 -t filter -p tcp --dport 22 -j DROP
 
 iptables -D INPUT 1 删除filter表INPUT链的第一条规则
 
+![image-20210111163949400](image/1.png)
 
+![image-20210111164300542](image/2.png)
 
-![image-20210111163949400](/Users/bn/Library/Application Support/typora-user-images/image-20210111163949400.png)
-
-![image-20210111164300542](/Users/bn/Library/Application Support/typora-user-images/image-20210111164300542.png)
-
-![image-20210111164433675](/Users/bn/Library/Application Support/typora-user-images/image-20210111164433675.png)
-
+![image-20210111164433675](image/3.png)
