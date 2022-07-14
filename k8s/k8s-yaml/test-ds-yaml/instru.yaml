@@ -1,0 +1,9 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector-headless.kube-system:4317
+  java:
+    image: cr-cn-beijing.volces.com/coa/autoinstrumentation-java:v0.52.0

@@ -1,0 +1,289 @@
+# serv-a
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-a
+  labels:
+    app: service-a
+spec:
+  type: NodePort
+  ports:
+    - port: 8081
+      targetPort: 8081
+      name: http
+  selector:
+    app: service-a
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-a
+  labels:
+    app: service-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-a
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-a
+    spec:
+      containers:
+        - name: service-a
+          image: cr-cn-beijing.volces.com/aos-test/abccall:a
+          imagePullPolicy: Always
+          env:
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: project=demo-project,service.name=service-a,service.namespace=demo-ns,deployment.environment=sy-dev,service.protocol=http,service.version=v1
+            - name: HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          ports:
+            - containerPort: 8081
+---
+# serv-b
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-b
+  labels:
+    app: service-b
+spec:
+  ports:
+    - port: 8082
+      name: http
+  selector:
+    app: service-b
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-b
+  labels:
+    app: service-b
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-b
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-b
+    spec:
+      containers:
+        - name: service-b
+          image: cr-cn-beijing.volces.com/aos-test/abccall:b
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8082
+
+---
+# serv-c
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-c
+  labels:
+    app: service-c
+spec:
+  ports:
+    - port: 8083
+      name: http
+  selector:
+    app: service-c
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-c
+  labels:
+    app: service-c
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-c
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-c
+    spec:
+      containers:
+        - name: service-c
+          image: cr-cn-beijing.volces.com/aos-test/abccall:c
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8083
+
+---
+# serv-d
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-d
+  labels:
+    app: service-d
+spec:
+  ports:
+    - port: 8084
+      name: http
+  selector:
+    app: service-d
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-d
+  labels:
+    app: service-d
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-d
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-d
+    spec:
+      containers:
+        - name: service-d
+          image: cr-cn-beijing.volces.com/aos-test/abccall:d
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8084
+
+---
+# serv-e
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-e
+  labels:
+    app: service-e
+spec:
+  ports:
+    - port: 8085
+      name: http
+  selector:
+    app: service-e
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-e
+  labels:
+    app: service-e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-e
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-e
+    spec:
+      containers:
+        - name: service-e
+          image: cr-cn-beijing.volces.com/aos-test/abccall:e
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8085
+
+---
+# serv-f
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-f
+  labels:
+    app: service-f
+spec:
+  ports:
+    - port: 8088
+      name: http
+  selector:
+    app: service-f
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-f
+  labels:
+    app: service-f
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-f
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-f
+    spec:
+      containers:
+        - name: service-f
+          image: cr-cn-beijing.volces.com/aos-test/abccall:f
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8088
+
+---
+# serv-g
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-g
+  labels:
+    app: service-g
+spec:
+  ports:
+    - port: 8087
+      name: http
+  selector:
+    app: service-g
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-g
+  labels:
+    app: service-g
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-g
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-java: "true"
+      labels:
+        app: service-g
+    spec:
+
+      containers:
+        - name: service-g
+          image: cr-cn-beijing.volces.com/aos-test/abccall:g
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8087
+
+
